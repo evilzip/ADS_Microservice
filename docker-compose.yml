@@ -1,0 +1,33 @@
+version: '3.7'
+services:
+
+  streamlit:
+    build:
+      context: ./streamlit
+    ports:
+      - 8501:8501
+    # без этого не выводит принты в консоль
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: always
+    networks:
+      - app
+    container_name: streamlit
+
+  imputation:
+    build:
+      context: ./imputation
+    ports:
+      - :8000
+    restart: always
+    networks:
+      - app
+    container_name: imputation
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - streamlit
+
+networks:
+  app:
+    driver: bridge
