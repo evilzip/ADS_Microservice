@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.9'
 services:
 
   streamlit:
@@ -23,6 +23,20 @@ services:
     networks:
       - app
     container_name: imputation
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - streamlit
+
+  xgboost:
+    build:
+      context: ./xgboost
+    ports:
+      - :8000
+    restart: always
+    networks:
+      - app
+    container_name: xgboost
     environment:
       - PYTHONUNBUFFERED=1
     depends_on:
