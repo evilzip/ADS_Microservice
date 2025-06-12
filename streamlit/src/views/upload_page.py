@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from utils.utils import generate_missing_data
+from utils.generate_missing_data import generate_missing_data
 
 
 df_for_import = pd.DataFrame()

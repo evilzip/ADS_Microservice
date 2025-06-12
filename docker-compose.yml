@@ -41,6 +41,48 @@ services:
       - PYTHONUNBUFFERED=1
     depends_on:
       - streamlit
+#
+#  lstm:
+#    build:
+#      context: ./lstm
+#    ports:
+#      - :8000
+#    restart: always
+#    networks:
+#      - app
+#    container_name: lstm
+#    environment:
+#      - PYTHONUNBUFFERED=1
+#    depends_on:
+#      - streamlit
+
+#  sarimags:
+#    build:
+#      context: ./sarimags
+#    ports:
+#      - :8000
+#    restart: always
+#    networks:
+#      - app
+#    container_name: sarimags
+#    environment:
+#      - PYTHONUNBUFFERED=1
+#    depends_on:
+#      - streamlit
+
+  holtwinters:
+    build:
+      context: ./holtwinters
+    ports:
+      - :8000
+    restart: always
+    networks:
+      - app
+    container_name: holtwinters
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - streamlit
 
 networks:
   app:

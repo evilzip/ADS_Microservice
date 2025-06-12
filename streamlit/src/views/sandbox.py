@@ -1,48 +1,24 @@
-import pandas as pd
 import requests
-import pickle
 import streamlit as st
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import plotly.io as pio
 from time import time
+import asyncio
+import aiohttp
 from plots.PlotBuilder import PlotBuilder
 from utils.compress_df import compress_df
 from utils.decompress_df import decompress_df
+from config import model_urls
+from model_requests.post_requets import fetch_all
 
-# from Imputation import Imputation
-# from Models.MovingAverage import MovingAverage
-# from Models.ExpoSmooth import ExpoSmooth
-# from Models.DoubleExpoSmooth import DoubleExpoSmooth
-# from Models.TripleExpoSmooth import TripleExpoSmooth
-# from Models.HoltWinters import HoltWinters
-# from Models.HoltWinters2 import HoltWinters2
-# from Models.SARIMAX import SARIMAX
-# from Models.SARIMAX_GS_smart import SARIMAX_GS_smart
-# from Models.SARIMAX_GS import SARIMAX_GS
-# from Models.SARIMAX_GS_2 import SARIMAX_GS_2
-# from Models.auto_sarima_pmdarima import AutoArima
-# from Models.XGBoostRegressor import XGBoostRegressor
-# from Models.XGBRegressor2 import XGBoostRegressor2
-# from Models.XGBRegressor3 import XGBoostRegressor3
-# from Models.LSTM_1 import LSTM_1
-# from Models.LSTM_2 import LSTM_2
+XGBOOST_URL = 'http://xgboost:8000/xgbregressor/'
+LSTM_URL = 'http://lstm:8000/lstm/'
+SARIMAGS_URL = 'http://sarimags:8000/sarimags/'
+HW_URL = 'http://holtwinters:8000/holtwinters/'
 
+urls = [XGBOOST_URL,
+        HW_URL
+        ]
 
 pb = PlotBuilder()
-# moving_average = MovingAverage()
-# expo_smooth = ExpoSmooth()
-# dbl_expo_smooth = DoubleExpoSmooth()
-# tes = TripleExpoSmooth()
-# hw = HoltWinters()
-# xgb = XGBoostRegressor()
-# xgb2 = XGBoostRegressor2()
-# xgb3 = XGBoostRegressor3()
-# lstm_1 = LSTM_1()
-# lstm_2 = LSTM_2()
-# sarimax_gs = SARIMAX_GS()
-# sarimax_gs_2 = SARIMAX_GS_2()
-# auto_Arima = AutoArima()
 
 data = st.session_state.df_for_import
 
@@ -80,21 +56,57 @@ if data is not None:
 
     # Main Calculation
     with st.spinner("Calculations in progress..."):
-        xgb_payload = {"df_to_xgb": compress_df(imputation_df)}
+        # xgb_payload = {"df_to_xgb": compress_df(imputation_df)}
+        # time_start = time()
+        # print('--------------------------before xgb request----------------------------------')
+        # # xgb_request = model_requests.post('http://xgboost:8000/xgbregressor/', data=xgb_payload)
+        # xgb_request = model_requests.post('http://89.104.65.117:8000/xgbregressor/', data=xgb_payload)
+        # print('--------------------------after xgb request------------------------------------')
+        # time_end = time()
+        # time_fitting = time_end - time_start
+        #
+        # xgb_dict = xgb_request.json()
+        # model_df = decompress_df(xgb_dict['xgb_model_df'])
+        # model_quality_df = decompress_df(xgb_dict['xgb_quality_df'])
+        # anomalies_df = decompress_df(xgb_dict['xgb_anomalies_df'])
+        # print(model_df)
+
+        payload = {"df_to_models": compress_df(imputation_df)}
+
+        # run the async functions
+        results = asyncio.run(fetch_all(urls=urls, payload=payload))
+        print(results)
+
         time_start = time()
-        print('--------------------------before xgb request----------------------------------')
-        xgb_request = requests.post('http://xgboost:8000/xgbregressor/', data=xgb_payload)
-        print('--------------------------after xgb request------------------------------------')
+        print('--------------------------before lsm request----------------------------------')
+        # xgb_request = model_requests.post('http://89.104.65.117:8000/xgbregressor/', data=xgb_payload)
+        # xgb_request = model_requests.post('http://xgboost:8000/xgbregressor/', data=payload)
+        # lstm_request = model_requests.post('http://lstm:8000/lstm/', data=payload)
+        # xgb_request = model_requests.post(XGBOOST_URL, data=payload)
+        # lstm_request = model_requests.post(LSTM_URL, data=payload)
+        # sarimags_request = model_requests.post(SARIMAGS_URL, data=payload)
+        hw_request = requests.post(HW_URL, data=payload)
+        print('--------------------------after lstm request------------------------------------')
         time_end = time()
         time_fitting = time_end - time_start
 
-        xgb_dict = xgb_request.json()
-        model_df = decompress_df(xgb_dict['xgb_model_df'])
-        model_quality_df = decompress_df(xgb_dict['xgb_quality_df'])
-        anomalies_df = decompress_df(xgb_dict['xgb_anomalies_df'])
-        print(model_df)
+        # lstm_dict = lstm_request.json()
+        # xgb_dict = xgb_request.json()
 
-#
+        hw_dict = hw_request.json()
+        # print('---------------------------------------reuest dict--------------------------------')
+        # print(lstm_dict)
+        # print('----------------------------------------------------------------------------------')
+        model_df = decompress_df(hw_dict['model_df'])
+        model_quality_df = decompress_df(hw_dict['quality_df'])
+        anomalies_df = decompress_df(hw_dict['anomalies_df'])
+        print(model_df)
+        # _model_df = decompress_df(xgb_dict['model_df'])
+        # _model_quality_df = decompress_df(xgb_dict['quality_df'])
+        # _anomalies_df = decompress_df(xgb_dict['anomalies_df'])
+        # print(_model_df)
+
+    #
     st.subheader('Timeseries model data with marked anomalies', divider=True)
     # fig = pb.plot_model_scatter(data=sarimax_gs_smart_index.model_df_least_MAPE,
     #                             columns_list=['Raw_Data', 'Y_Predicted'])
@@ -107,7 +119,7 @@ if data is not None:
     # Model quality section
     st.subheader("Model Quality", divider=True)
     # st.write(sarimax_gs_smart_index.model_quality_df)
-    st.write(f'Время расчета: {round(time_fitting,2)} seconds')
+    st.write(f'Время расчета: {round(time_fitting, 2)} seconds')
     st.write(model_quality_df)
 
     # Anomalies section

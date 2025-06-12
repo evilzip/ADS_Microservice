@@ -20,7 +20,7 @@ upload_page = st.Page(
 
 # --- NAVIGATION SETUP ---
 
-pg = st.navigation(pages=[info_page, upload_page, sandbox  ])
+pg = st.navigation(pages=[info_page, upload_page, sandbox])
 
 # # --- RUN NAVIGATION ---
 pg.run()
