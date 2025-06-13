@@ -6,8 +6,9 @@ import aiohttp
 from plots.PlotBuilder import PlotBuilder
 from utils.compress_df import compress_df
 from utils.decompress_df import decompress_df
+from utils.extrct_model_qlty import extract_model_winner_dfs
 from config import model_urls
-from model_requests.post_requets import fetch_all
+from model_requests.post_requests import fetch_all
 
 XGBOOST_URL = 'http://xgboost:8000/xgbregressor/'
 LSTM_URL = 'http://lstm:8000/lstm/'
@@ -56,55 +57,18 @@ if data is not None:
 
     # Main Calculation
     with st.spinner("Calculations in progress..."):
-        # xgb_payload = {"df_to_xgb": compress_df(imputation_df)}
-        # time_start = time()
-        # print('--------------------------before xgb request----------------------------------')
-        # # xgb_request = model_requests.post('http://xgboost:8000/xgbregressor/', data=xgb_payload)
-        # xgb_request = model_requests.post('http://89.104.65.117:8000/xgbregressor/', data=xgb_payload)
-        # print('--------------------------after xgb request------------------------------------')
-        # time_end = time()
-        # time_fitting = time_end - time_start
-        #
-        # xgb_dict = xgb_request.json()
-        # model_df = decompress_df(xgb_dict['xgb_model_df'])
-        # model_quality_df = decompress_df(xgb_dict['xgb_quality_df'])
-        # anomalies_df = decompress_df(xgb_dict['xgb_anomalies_df'])
-        # print(model_df)
-
         payload = {"df_to_models": compress_df(imputation_df)}
-
+        time_start = time()
         # run the async functions
         results = asyncio.run(fetch_all(urls=urls, payload=payload))
-        print(results)
-
-        time_start = time()
-        print('--------------------------before lsm request----------------------------------')
-        # xgb_request = model_requests.post('http://89.104.65.117:8000/xgbregressor/', data=xgb_payload)
-        # xgb_request = model_requests.post('http://xgboost:8000/xgbregressor/', data=payload)
-        # lstm_request = model_requests.post('http://lstm:8000/lstm/', data=payload)
-        # xgb_request = model_requests.post(XGBOOST_URL, data=payload)
-        # lstm_request = model_requests.post(LSTM_URL, data=payload)
-        # sarimags_request = model_requests.post(SARIMAGS_URL, data=payload)
-        hw_request = requests.post(HW_URL, data=payload)
-        print('--------------------------after lstm request------------------------------------')
+        model_name, model_df, anomalies_df, model_quality_df = extract_model_winner_dfs(results)
+        print('------------------best mape model--------------------')
+        print(model_name)
+        print(model_quality_df)
+        print('------------------after best mape model--------------------')
         time_end = time()
         time_fitting = time_end - time_start
 
-        # lstm_dict = lstm_request.json()
-        # xgb_dict = xgb_request.json()
-
-        hw_dict = hw_request.json()
-        # print('---------------------------------------reuest dict--------------------------------')
-        # print(lstm_dict)
-        # print('----------------------------------------------------------------------------------')
-        model_df = decompress_df(hw_dict['model_df'])
-        model_quality_df = decompress_df(hw_dict['quality_df'])
-        anomalies_df = decompress_df(hw_dict['anomalies_df'])
-        print(model_df)
-        # _model_df = decompress_df(xgb_dict['model_df'])
-        # _model_quality_df = decompress_df(xgb_dict['quality_df'])
-        # _anomalies_df = decompress_df(xgb_dict['anomalies_df'])
-        # print(_model_df)
 
     #
     st.subheader('Timeseries model data with marked anomalies', divider=True)

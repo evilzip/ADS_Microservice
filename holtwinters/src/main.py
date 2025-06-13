@@ -1,14 +1,13 @@
 import uvicorn
 from fastapi import FastAPI, Body
 
-
 from holtwinters.holtwinters import HoltWinters
 from utils.compress_df import compress_df
 from utils.decompress_df import decompress_df
 
 # Initialize Imputation object
 
-
+MODEL_NAME = 'HoltWinters'
 # Initialize FastAPI app
 app = FastAPI(debug=True)
 
@@ -16,7 +15,13 @@ app = FastAPI(debug=True)
 # Define FastAPI endpoints
 @app.get("/")
 async def read_root():
-    return {"message": "SARIMAX model API"}
+    return {"message": "HoltWinters model API"}
+
+
+@app.get("/health")
+async def health_check():
+    return {'model_name': MODEL_NAME,
+            'status': 'OK'}
 
 
 @app.post("/holtwinters/")
@@ -41,6 +46,7 @@ async def holtwinters(df_to_models: str = Body(...)):
     quality_df_str = compress_df(model.model_quality_df)
     anomalies_df_str = compress_df(model.anomalies_df)
     return {
+        'model_name': MODEL_NAME,
         'model_df': model_df_str,
         'quality_df': quality_df_str,
         'anomalies_df': anomalies_df_str
@@ -49,4 +55,3 @@ async def holtwinters(df_to_models: str = Body(...)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host='0.0.0.0', port=8000, reload=True)
-

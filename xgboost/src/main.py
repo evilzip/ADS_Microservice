@@ -55,6 +55,7 @@ async def xgbregressor(df_to_models: str = Body(...)):
     quality_df_str = compress_df(model.model_quality_df)
     anomalies_df_str = compress_df(model.anomalies_df)
     return {
+        'model_name': 'xgbregressor',
         'model_df': model_df_str,
         'quality_df': quality_df_str,
         'anomalies_df': anomalies_df_str
