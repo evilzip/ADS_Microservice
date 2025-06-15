@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from pandas._libs.tslibs.parsing import DateParseError
 from utils.generate_missing_data import generate_missing_data
 
 
@@ -11,7 +12,17 @@ st.title("Upload and Configure timeseries")
 st.subheader("1. Upload your data", divider=True)
 uploaded_file = st.file_uploader("Upload dataset here - Only '*.csv' File", key="upload_1")
 if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file, thousands=',')
+    try:
+        df = pd.read_csv(uploaded_file, thousands=',')
+    except FileNotFoundError:
+        print("File not found.")
+    except pd.errors.EmptyDataError:
+        print("Empty file - No data")
+    except pd.errors.ParserError:
+        print("Parse error")
+    except Exception:
+        print("Some other exception")
+
     st.subheader("Loaded data")
     st.write(df)
     # Sample data
@@ -36,44 +47,51 @@ if uploaded_file is not None:
         income_configured_data_frame['Time'] = df[selected_time_column].values
         income_configured_data_frame['Raw_Data'] = df[selected_value_column].values
         # income_configured_data_frame['Raw_Data'] = income_configured_data_frame['Raw_Data'].astype('float')
-        income_configured_data_frame['Time'] = pd.to_datetime(income_configured_data_frame['Time'])
+        try:
+            income_configured_data_frame['Time'] = pd.to_datetime(income_configured_data_frame['Time'])
+            step_2_error = False
+        except DateParseError as e:
+            st.error(f'{e}')
+            step_2_error = True
+
         income_configured_data_frame = income_configured_data_frame.set_index('Time')
         column_submit = st.form_submit_button("Submit columns selection")
 
-    st.subheader("3. Select time range", divider=True)
-    with st.form(key='range_configure'):
-        options = income_configured_data_frame.index
-        # print("options", options)
-        min_value = options[0]
-        max_value = options[-1]
-        #Time range slider
-        start_income_df, end_income_df = st.select_slider(
-            "Select a range for analysis",
-            options=options,
-            value=(min_value, max_value),
-            key='slider_time_limits'
-        )
-        #print("start_income_df, end_income_df", start_income_df, end_income_df)
-        income_configured_data_frame = income_configured_data_frame.loc[start_income_df:end_income_df]
-        range_submit = st.form_submit_button("Submit range selection")
+    if not step_2_error:
+        st.subheader("3. Select time range", divider=True)
+        with st.form(key='range_configure'):
+            options = income_configured_data_frame.index
+            # print("options", options)
+            min_value = options[0]
+            max_value = options[-1]
+            #Time range slider
+            start_income_df, end_income_df = st.select_slider(
+                "Select a range for analysis",
+                options=options,
+                value=(min_value, max_value),
+                key='slider_time_limits'
+            )
+            #print("start_income_df, end_income_df", start_income_df, end_income_df)
+            income_configured_data_frame = income_configured_data_frame.loc[start_income_df:end_income_df]
+            range_submit = st.form_submit_button("Submit range selection")
 
-    st.subheader("4. Review configured dataframe and submit for analysis", divider=True)
-    st.write('Yours configured timeseries dataframe', income_configured_data_frame)
-    if st.button('Submit for analysis', key='main_confirm_btn'):
-        # import income_configured_data_frame to plot builder ?????
-        # st.session_state - python dictionary
-        # Add income_configured_data_frame as value with key 'df_for_import'
-        # st.session_state = {'df_for_import' : income_configured_data_frame}
-        income_configured_data_frame = generate_missing_data(income_configured_data_frame)
-        if 'df_for_import' not in st.session_state:
-            st.session_state['df_for_import'] = income_configured_data_frame
-        else:
-            st.session_state['df_for_import'] = income_configured_data_frame
-        df_for_import = income_configured_data_frame
-        # income_configured_data_frame.to_csv('Data/configured_csv.csv')
-        st.write("Configured dataframe has been sent for  analysis")
-        # print("data frame for analisis", income_configured_data_frame)
-        # print("INFO", type(income_configured_data_frame.index))
-        # print("INFO", type(income_configured_data_frame.Raw_Data))
-        st.session_state['new_data_flag'] = True
+        st.subheader("4. Review configured dataframe and submit for analysis", divider=True)
+        st.write('Yours configured timeseries dataframe', income_configured_data_frame)
+        if st.button('Submit for analysis', key='main_confirm_btn'):
+            # import income_configured_data_frame to plot builder ?????
+            # st.session_state - python dictionary
+            # Add income_configured_data_frame as value with key 'df_for_import'
+            # st.session_state = {'df_for_import' : income_configured_data_frame}
+            income_configured_data_frame = generate_missing_data(income_configured_data_frame)
+            if 'df_for_import' not in st.session_state:
+                st.session_state['df_for_import'] = income_configured_data_frame
+            else:
+                st.session_state['df_for_import'] = income_configured_data_frame
+            df_for_import = income_configured_data_frame
+            # income_configured_data_frame.to_csv('Data/configured_csv.csv')
+            st.subheader("5. Configured timeseries has been sent for analysis. Go to Result page", divider=True)
+            # print("data frame for analisis", income_configured_data_frame)
+            # print("INFO", type(income_configured_data_frame.index))
+            # print("INFO", type(income_configured_data_frame.Raw_Data))
+            st.session_state['new_data_flag'] = True
 
