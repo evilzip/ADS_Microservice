@@ -2,13 +2,14 @@
 import aiohttp
 # подключаем модуль для асинхронного кода asyncio
 import asyncio
+import streamlit
 
 
 async def fetch_model_health(session: aiohttp.ClientSession, health_url: str):
     try:
         async with session.get(health_url) as response:
             response.raise_for_status()  # Raise exception for HTTP errors
-            # status = await response.json()
+            status_dict = await response.json()
             status = 'OK'
             # return data
     except aiohttp.ClientError as e:

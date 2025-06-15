@@ -5,17 +5,18 @@ from utils.generate_missing_data import generate_missing_data
 
 df_for_import = pd.DataFrame()
 
-st.title("Upload dataset here - Only '*.csv' File (temporarily)")
+st.title("Upload and Configure timeseries")
 
 #
-uploaded_file = st.file_uploader("Choose your dataset (csv file only)", key="upload_1")
+st.subheader("1. Upload your data", divider=True)
+uploaded_file = st.file_uploader("Upload dataset here - Only '*.csv' File", key="upload_1")
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file, thousands=',')
-    st.subheader("Loaded data", divider=True)
+    st.subheader("Loaded data")
     st.write(df)
     # Sample data
     # Form to select columns
-    st.subheader("Select Time and Value column", divider=True)
+    st.subheader("2. Select Time and Value columns", divider=True)
     with st.form(key='configure_column'):
         income_configured_data_frame = pd.DataFrame(columns=['Time', 'Raw_Data'])
         col1, col2 = st.columns(2, vertical_alignment="bottom")
@@ -39,7 +40,7 @@ if uploaded_file is not None:
         income_configured_data_frame = income_configured_data_frame.set_index('Time')
         column_submit = st.form_submit_button("Submit columns selection")
 
-    st.subheader("Select time range", divider=True)
+    st.subheader("3. Select time range", divider=True)
     with st.form(key='range_configure'):
         options = income_configured_data_frame.index
         # print("options", options)
@@ -56,7 +57,7 @@ if uploaded_file is not None:
         income_configured_data_frame = income_configured_data_frame.loc[start_income_df:end_income_df]
         range_submit = st.form_submit_button("Submit range selection")
 
-    st.subheader("Review configured dataframe and submit for analysis", divider=True)
+    st.subheader("4. Review configured dataframe and submit for analysis", divider=True)
     st.write('Yours configured timeseries dataframe', income_configured_data_frame)
     if st.button('Submit for analysis', key='main_confirm_btn'):
         # import income_configured_data_frame to plot builder ?????
@@ -74,4 +75,5 @@ if uploaded_file is not None:
         # print("data frame for analisis", income_configured_data_frame)
         # print("INFO", type(income_configured_data_frame.index))
         # print("INFO", type(income_configured_data_frame.Raw_Data))
+        st.session_state['new_data_flag'] = True
 

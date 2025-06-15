@@ -1,13 +1,12 @@
 import uvicorn
 from fastapi import FastAPI, Body
 
-
 from lstm.lstm import LSTM2
 from utils.compress_df import compress_df
 from utils.decompress_df import decompress_df
 
 # Initialize Imputation object
-
+MODEL_NAME = 'LSTM'
 
 # Initialize FastAPI app
 app = FastAPI(debug=True)
@@ -17,6 +16,12 @@ app = FastAPI(debug=True)
 @app.get("/")
 async def read_root():
     return {"message": "Welcome to the XGBoost regressor API!"}
+
+
+@app.get("/health")
+async def health_check():
+    return {'model_name': MODEL_NAME,
+            'status': 'OK'}
 
 
 @app.post("/lstm/")
@@ -41,7 +46,7 @@ async def lstm(df_to_models: str = Body(...)):
     quality_df_str = compress_df(model.model_quality_df)
     anomalies_df_str = compress_df(model.anomalies_df)
     return {
-        'model_name': 'lstm',
+        'model_name': MODEL_NAME,
         'model_df': model_df_str,
         'quality_df': quality_df_str,
         'anomalies_df': anomalies_df_str
@@ -50,4 +55,3 @@ async def lstm(df_to_models: str = Body(...)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host='0.0.0.0', port=8000, reload=True)
-

@@ -6,15 +6,15 @@ from model_requests.get_requests import fetch_all_health
 st.header("Anomaly Detection Software", divider=True)
 st.subheader('This is visual and functional prototype of project "ADSoft"')
 
-XGBOOST_HEALTH_URL = 'http://xgboost:8000/health/'
-LSTM_URL = 'http://lstm:8000/lstm/'
-SARIMAGS_URL = 'http://sarimags:8000/sarimags/'
-HW_HEALTH_URL = 'http://holtwinters:8000/health/'
+XGBOOST_HEALTH_URL = 'http://89.104.65.117:8000/health/'
+LSTM_URL = 'http://87.228.101.34:8000/health/'
+SARIMAGS_HEALTH_URL = 'http://89.104.66.194:8000/health/'
+HW_HEALTH_URL = 'http://89.104.66.247:8000/health/'
 
 health_urls = [
     XGBOOST_HEALTH_URL,
     LSTM_URL,
-    SARIMAGS_URL,
+    SARIMAGS_HEALTH_URL,
     HW_HEALTH_URL
 ]
 

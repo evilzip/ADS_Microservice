@@ -7,5 +7,5 @@ numpy==1.24.3;
 Requests
 scikit_learn
 scipy
-tensorflow
+tensorflow[and-cuda]==2.16.2
 uvicorn

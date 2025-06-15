@@ -28,20 +28,20 @@ services:
     depends_on:
       - streamlit
 
-  xgboost:
-    build:
-      context: ./xgboost
-    ports:
-      - :8000
-    restart: always
-    networks:
-      - app
-    container_name: xgboost
-    environment:
-      - PYTHONUNBUFFERED=1
-    depends_on:
-      - streamlit
-#
+#  xgboost:
+#    build:
+#      context: ./xgboost
+#    ports:
+#      - :8000
+#    restart: always
+#    networks:
+#      - app
+#    container_name: xgboost
+#    environment:
+#      - PYTHONUNBUFFERED=1
+#    depends_on:
+#      - streamlit
+##
 #  lstm:
 #    build:
 #      context: ./lstm
@@ -55,34 +55,34 @@ services:
 #      - PYTHONUNBUFFERED=1
 #    depends_on:
 #      - streamlit
-
-#  sarimags:
+#
+##  sarimags:
+##    build:
+##      context: ./sarimags
+##    ports:
+##      - :8000
+##    restart: always
+##    networks:
+##      - app
+##    container_name: sarimags
+##    environment:
+##      - PYTHONUNBUFFERED=1
+##    depends_on:
+##      - streamlit
+#
+#  holtwinters:
 #    build:
-#      context: ./sarimags
+#      context: ./holtwinters
 #    ports:
 #      - :8000
 #    restart: always
 #    networks:
 #      - app
-#    container_name: sarimags
+#    container_name: holtwinters
 #    environment:
 #      - PYTHONUNBUFFERED=1
 #    depends_on:
 #      - streamlit
-
-  holtwinters:
-    build:
-      context: ./holtwinters
-    ports:
-      - :8000
-    restart: always
-    networks:
-      - app
-    container_name: holtwinters
-    environment:
-      - PYTHONUNBUFFERED=1
-    depends_on:
-      - streamlit
 
 networks:
   app:
